@@ -1,0 +1,302 @@
+---
+title: "Restaurant Data Analysis and Future Profit Prediction"
+author: "Andres Brett"
+date: "Fall 2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Preparation 
+Here we will need to take the following steps to successfully prepare the client's restaurant information.
+
+1)Load necessary library's
+2)Create a variable to house the client's information
+3)Randomly sample the client's information into testing and training groups
+4)Export the data to csv for future use and comment out the random sample syntax for consistency
+5)Import the static data set for training and testing
+
+```{r}
+#1)Load necessary library's
+library(dplyr)
+library(tidyverse)
+library(knitr)
+library(tinytex)
+
+#2)Create a variable to house the client's information
+restaurants <- read.csv("restaurants.csv", header = TRUE)
+restaurants <- as_tibble(restaurants)
+
+
+
+#3)Randomly sample the client's information into testing and training groups
+#rt.training <- sample_n(restaurants, 170)
+#rt.testing <- filter(restaurants, !(ID %in%rt.training$ID))
+
+#4)Export the data to csv for future use and comment out the random sample syntax for consistency
+#write.csv(rt.training,"rt.training.csv", row.names = TRUE)
+#write.csv(rt.testing,"rt.testing.csv", row.names = TRUE)
+
+#5)Import the static data set for training and testing
+rt.training <- read.csv("rt.training.csv", header = TRUE)
+rt.testing <- read.csv("rt.testing.csv", header = TRUE)
+
+```
+
+## Data Exploration 
+
+### Problem 1
+
+This problem asks how many restaurants market their food as traditional? And how many market their food as creative? Is there a significant difference in table turns between restaurants whose food is marketed as traditional versus creative? Also use a side-by-side box plot to present the table turns of the two types of restaurants. 
+
+We collected the restaurant's dataset mean, standard deviation, and boxplot graph to addresses this problem. 
+
+The next code chunk will do the following.
+1)Create a new object to group restaurants by cuisine type.
+2)Summarize the different cuisine type using mean, standard deviation, and count of restaurants that fall in each category.
+3) Present the numerical results in a nicely formatted table
+
+
+
+```{r}
+#1)Create a new object to group restaurants by cuisine type.
+TableTurns <- group_by(restaurants, Cuisine)
+#2)Summarize the different cuisine type using mean, standard deviation, and count of restaurants that fall in each category.
+TableTurnsGroup <- summarize(TableTurns,
+                             Table_Turn_Mean = mean(Table.Turns),
+                             Table_Turn_Sd = sd(Table.Turns),
+                             Table_Turn_Size = length(Table.Turns)
+                             )
+#3) Present the numerical results in a nicely formatted table
+kable(TableTurnsGroup)
+
+
+```
+With the table above we are able to determine that restaurants with traditional cuisine have a significantly higher weekly average table turn rate. Additionally, we are able to see that each type of cuisine does deviate from the mean in nearly the amount.
+
+To better understand the data in our table, below we will be using a side-by-side boxplot to aide with visual comprehension.
+
+The steps we take below are as follows...
+1)Transform the Cuisine variable into observations that are simpler to understand (traditional & creative versus 0 & 1)
+2)Create the Table Turns boxplot object
+3)Present the side-by-side boxplot
+
+```{r}
+#1)Transform the Cuisine variable into observations that are simpler 
+#to understand (traditional & creative versus 0 & 1)
+restaurants$Cuisine <- as_factor(restaurants$Cuisine)
+levels(restaurants$Cuisine) <- c("Traditional", "Creative")
+
+#2)Create the Table Turns boxplot object
+TableTurnsBoxPlot <- ggplot(restaurants, aes(x = Cuisine, y = Table.Turns)) + 
+  geom_boxplot(fill = "#56B4E9") + 
+  labs(title = "Table Turns by Cuisine Type",
+       x = "Cuisine Type",
+       y = "Number of Table Turns per Week")
+
+#3)Present the side-by-side boxplot
+TableTurnsBoxPlot
+
+
+
+```
+
+
+In the above side-by-side boxplot we can clearly see the traditional cuisine type with a higher average table turn rate. This is significant as it indicates a higher volume of customers. Also, we notice a tighter standard deviation from the mean of traditional cuisines providing the business a more reliable source of income from customers. 
+
+
+### Problem 2
+
+Create a new variable “age” in the restaurants data set, which is the age of the restaurants in 2019. Report the mean, standard deviation, maximum, and minimum of the age variable. 
+
+Below we determine the restaurants age in 2019 and report out the coinciding average, standard deviation, maximum, and minimum ages.
+
+We take the following steps: 
+1)Calculate and append the age (as of 2019) variable to a new object
+2)Perform statistical calculations on the age variable
+
+```{r}
+#1)Calculate and append the age (as of 2019) variable to a new object
+restaurants_w_age <- mutate(restaurants, 
+       age = 2019 - restaurants$Year)
+
+#2)Perform statistical calculations on the age variable
+Mean_Age <- mean(restaurants_w_age$age)
+Sd_Age <- sd(restaurants_w_age$age)
+Max_Age <- max(restaurants_w_age$age)
+Min_Age <- min(restaurants_w_age$age)
+
+Mean_Age  
+Sd_Age  
+Max_Age 
+Min_Age 
+    
+```
+The average age of our restaurants sample is `r Mean_Age`, the standard deviation of our sample is `r Sd_Age`, the max age of our sample is `r Max_Age`, and the minimum age of our sample is `r Min_Age`.
+
+With these data points we can determine that a standard life cycle of restaurants is between `r Mean_Age -Sd_Age` and `r Mean_Age +Sd_Age`... taking for granted there are outliers in both directions.
+
+In addition, we present a histogram of the age variable.
+3)Create a show a histogram of the age variable
+
+```{r}
+#3)Create a show a histogram of the age variable
+ggplot(restaurants_w_age, aes(x = age)) + 
+  geom_histogram(binwidth = 4)
+```
+
+
+The age histogram above was binned in intervals of 4 which displays a right tailed histogram. This shows that the number of restaurants open decreases as the years go on.
+
+
+## Regression Modeling and Interpretations 
+
+### Problem 3
+Fit a regression model to explain restaurant table turns.
+1)Review the regression model using Table Turns as the response variable and all other variables as explanatory.
+2)Determine if any variable in the data are not significant (p-value > .05)
+3)Reevaluate regression model to only include significant variables.
+4)Comment out unnecessary regression models.
+5)Summarize results
+
+```{r}
+
+#1)Review the regression model using Table Turns as the response variable and all other variables as explanatory.
+#2)Determine if any variable in the data are not significant (p-value > .05)
+#4)Comment out unnecessary regression models.
+
+#lm.restaurants <- lm(Table.Turns ~ ID + Advertising + Adsplay + Year + Days + Price + Parking + Rating + Cuisine, data = restaurants)
+#lm.results <- summary(lm.restaurants)
+#lm.results
+
+#3)Reevaluate regression model to only include significant variables.
+lm.restaurants2 <- lm(Table.Turns ~ Advertising + Adsplay + Rating + Price, data = restaurants)
+
+#5)Summarize results
+lm.results2 <- summary(lm.restaurants2)
+
+```
+
+### Problem 4
+
+Interpret the regression results. You should follow the 5 steps covered in class to analyze the results. The 5th step – prediction – is conducted in the next question. When interpreting the results, make sure you address your client’s concern regarding what can be done to improve table turns. For example, your client is interested in knowing if advertising is worth it. What would you recommend your client to do?
+
+### Step 1
+Interpret the overall model
+
+```{r}
+
+lm.results2
+
+```
+
+In our example, it can be seen that p-value of the F-statistic is < 2.2e-16, which is highly significant. We say the regression model overall is significant. This means that, at least, one of the explanatory variables is significantly related to the response variable.
+
+
+### Step 2
+Here we will interpret the regression (beta) coefficients. 
+
+```{r}
+
+lm.results2.coef <- lm.results2$coefficients
+lm.results2.coef
+kable(lm.results2.coef, digits = c(3, 3, 3, 3))
+
+View(restaurants)
+
+```
+
+The estimated coefficients are `r lm.results2.coef[2]` for advertising, `r lm.results2.coef[3]` for Adsplay, `r lm.results2.coef[4]` for Rating and `r lm.results2.coef[5]` for Price. 
+
+These coefficients indicate that when all else is constant, as the yearly advertising expenditure increases by $1,000, the number of tables turned is increased by `r lm.results2.coef[2]`. 
+
+As the number of commercials play per week on web pages increase by 1 unit, the number of tables turned is increased by `r lm.results2.coef[3]`.
+
+As the overall service rating is increased by 1 unit, the number of tables turned is increased by `r lm.results2.coef[4]`.
+
+As the the average spend per person is increased by $1, the number of tables turned is increased by `r lm.results2.coef[5]`.
+
+Overall, advertising is not the best thing to invest in for additional customer volume from table turns. Instead the client should work to increase their overall service rating as this provides the highest return on investment. 
+
+### Step 3
+
+We determine the regression equation with the explanatory variable(s) identified in the previous step. The equation is written below.
+
+Estimated Table Turns = -102.559 + 0.085 * Advertising + 3.380 * Adsplay + 10.446 * Rating + 1.325 * Price
+
+
+### Step 4
+
+Next we assess the model using R-Square
+1)Determine R Squared
+2)Determine the Adjusted R Squared
+
+```{r}
+#1)Determine R Squared
+lm.results2$r.squared 
+
+#2)Determine the Adjusted R Squared
+lm.results2$adj.r.squared  
+
+```
+
+The R-square of the regression model is `r lm.results2$r.squared`. It tells us that the regression model explains about `r lm.results2$r.squared * 100`% of the variance in the regression model.
+
+## Prediction and Validation  
+
+### Problem 5
+Based on the regression results, we predict which 10 restaurants in the testing set ranked highest in table turns. Clearly state your answer in the report (i.e., the 10 restaurant IDs).
+
+We determined this by doing the following: 
+1)Predict estimated table turns using the regression model against the testing data set.
+2)Append the predictions to the testing object 
+3)Sort the testing data set by highest estimated table turn and assign to new object
+4)Create object and display the estimated top ten restaurant ID's (based on prediction)
+
+```{r}
+#1)Predict estimated table turns using the regression model against the testing data set.
+#2)Append the predictions to the testing object 
+rt.testing <- mutate(rt.testing, 
+       Estimated_Table_Turn = predict(lm.restaurants2, data.frame(rt.testing)))
+
+#3)Sort the testing data set by highest estimated table turn and assign to new object
+Table.Turn.Estimate.Sort <- arrange(rt.testing, desc(Estimated_Table_Turn))
+
+#4)Create object and display the estimated top ten restaurant ID's (based on prediction)
+Table.Turn.Sort.Top.10.Estimate <- head(Table.Turn.Estimate.Sort, 10)
+Table.Turn.Sort.Top.10.Estimate$ID
+
+```
+
+Based on our results the top ten restaurants with table turns are `r Table.Turn.Sort.Top.10.Estimate$ID` (displayed with the highest table turn restaurant ID - far left, to the lowest - far right).
+
+### Problem 6
+Here we validate our predictions using the real table turns values in the testing set: Are there any top 10 actual restaurants in our predicted top 10.
+1)Sort the testing data by highest Table Turns and assign to a new object.
+2)Create object and display the top ten restaurant ID's (based on prediction)
+3)Compare prediction versus actuals
+
+```{r}
+#1)Sort the testing data by highest actual Table Turns and assign to a new object.
+Table.Turn.Sort <- arrange(rt.testing, desc(Table.Turns))
+
+#2)Create object and display the top ten restaurant ID's (based on prediction)
+Table.Turn.Sort.Top.10 <- head(Table.Turn.Sort, 10)
+Table.Turn.Sort.Top.10
+
+#3)Compare prediction versus actuals
+View(Table.Turn.Sort.Top.10.Estimate)
+View(Table.Turn.Sort.Top.10)
+
+
+```
+
+
+Based upon our prediction results, 8 of the top 10 predicted table turn restaurants are in the top 10 actual table turn restaurants. This means that we can strongly rely on the prediction and regression models that have been developed. 
+
+The data points provided from the client can be used to to help determine what can be done to improve table turns. That is, to improve Table Turns is to increase the clients investment on overall service ratings and Adsplay. For future predictions, we would provide and use the following estimated regression equation there Estimated Table Turns = -102.559 + 0.085 * Advertising + 3.380 * Adsplay + 10.446 * Rating + 1.325 * Price. 
