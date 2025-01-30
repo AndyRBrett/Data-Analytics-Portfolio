@@ -6,7 +6,7 @@ Welcome to my data analytics portfolio! Here, you'll find projects showcasing my
 1. **Restaurant Data Analysis & Future Profit Prediction**
    - Tools: R Studio
    - Summary: Data Exploration of restaurant data set with regression modeling and interprations KPI's.
-   - [View Project](link-to-project-folder)
+   - [View Project](Restaurant Data Analysis & Future Profit Prediction.pdf)
      
 2. **Exploratory Data Analysis on Sales Data**
    - Tools: Python, Pandas, Matplotlib
